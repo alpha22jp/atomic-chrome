@@ -5,6 +5,10 @@ Emacs Chrome is the Emacs version of [Atomic Chrome](https://atom.io/packages/at
 * The input on Emacs is reflected to the browser instantly and continuously.
 * You can use both the browser and Emacs at the same time. They are updated to the same content bi-directionally.
 
+## Screencast
+
+![Screencast](https://github.com/alpha22jp/emacs-chrome/blob/master/images/screencast.gif)
+
 ## Requirements
 
 * Emacs: 24.4 or later
