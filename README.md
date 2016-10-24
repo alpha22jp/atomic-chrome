@@ -18,11 +18,11 @@ This is the Emacs version of [Atomic Chrome](https://atom.io/packages/atomic-chr
 
 ### For Chrome
 
-Emacs Chrome shares [Atomic Chrome](https://atom.io/packages/atomic-chrome) as an extension on Chrome. Just install and setup it.
+Atomic Chrome for Emacs shares [Atomic Chrome](https://atom.io/packages/atomic-chrome) as an extension on Chrome. Just install and setup it.
 
 ### For Emacs
 
-Emacs Chrome can be installed via MELPA as below.
+Atomic Chrome for Emacs can be installed via MELPA as below.
 
 <kbd>M-x package-install [RET] atomic-chrome [RET]</kbd>
 
@@ -39,4 +39,4 @@ Then add the following lines to your `.emacs`.
 3. Press Atomic Chrome button on the tool bar.
 4. Contet of the text area is opened in a new buffer of Emacs.
 5. Edit content on Emacs buffer.
-6. <kbd>C-c C-c</kbd> or `M-x kill-buffer` to finish editing.
+6. <kbd>C-c C-c</kbd> or `M-x kill-buffer` to finish editing, or the buffer automatically killed if the browser closes the connection.
