@@ -1,13 +1,13 @@
-# Emacs Chrome
+# Atomic Chrome for Emacs
 
-Emacs Chrome is the Emacs version of [Atomic Chrome](https://atom.io/packages/atomic-chrome) which is an extension for Google Chrome browser that allows you to edit text areas of the browser in Emacs. It's similar to [Edit with Emacs](https://www.emacswiki.org/emacs/Edit_with_Emacs), but has some advantages as below with the help of websocket.
+This is the Emacs version of [Atomic Chrome](https://atom.io/packages/atomic-chrome) which is an extension for Google Chrome browser that allows you to edit text areas of the browser in Emacs. It's similar to [Edit with Emacs](https://www.emacswiki.org/emacs/Edit_with_Emacs), but has some advantages as below with the help of websocket.
 
 * The input on Emacs is reflected to the browser instantly and continuously.
 * You can use both the browser and Emacs at the same time. They are updated to the same content bi-directionally.
 
 ## Screencast
 
-![Screencast](https://github.com/alpha22jp/emacs-chrome/blob/master/images/screencast.gif)
+![Screencast](https://github.com/alpha22jp/atomic-chrome/blob/master/images/screencast.gif)
 
 ## Requirements
 
@@ -24,12 +24,12 @@ Emacs Chrome shares [Atomic Chrome](https://atom.io/packages/atomic-chrome) as a
 
 Emacs Chrome can be installed via MELPA as below.
 
-<kbd>M-x package-install [RET] emacs-chrome [RET]</kbd>
+<kbd>M-x package-install [RET] atomic-chrome [RET]</kbd>
 
 Then add the following lines to your `.emacs`.
 
 ```.emacs
-(require 'emacs-chrome)
+(require 'atomic-chrome)
 ```
 
 ## Usage
