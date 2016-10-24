@@ -29,6 +29,11 @@
 (require 'let-alist)
 (require 'websocket)
 
+(defgroup atomic-chrome nil
+  "Edit Chrome text area with Emacs using Atomic Chrome."
+  :prefix "atomic-chrome-"
+  :group 'applications)
+
 (defcustom atomic-chrome-buffer-open-style 'split
   "Specify the style to open new buffer for editing."
   :type '(choice (const :tag "Open buffer with full window" full)
