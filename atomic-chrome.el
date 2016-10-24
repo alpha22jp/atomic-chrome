@@ -129,7 +129,7 @@ where FRAME show raw data received."
 (defvar atomic-chrome-edit-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-x C-s") 'atomic-chrome-send-buffer-text)
-    (define-key map (kbd "C-c C-c") 'kill-buffer)
+    (define-key map (kbd "C-c C-c") 'kill-buffer-and-window)
     map)
   "Keymap for minor mode `atomic-chrome-edit-mode'.")
 
