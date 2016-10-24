@@ -133,9 +133,7 @@ where FRAME show raw data received."
   :group 'atomic-chrome
   :lighter " AtomicChrome"
   :init-value nil
-  :keymap atomic-chrome-edit-mode-map
-  (when (and (numberp arg) (> arg 0))
-    (run-hooks 'atomic-chrome-edit-mode-hook)))
+  :keymap atomic-chrome-edit-mode-map)
 
 (defvar atomic-chrome-server-conn
       (websocket-server
