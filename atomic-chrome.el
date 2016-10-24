@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016 alpha22jp <alpha22jp@gmail.com>
 
 ;; Author: alpha22jp <alpha22jp@gmail.com>
-;; Package-Requires: ((let-alist "1.0.4") (websocket "1.4"))
+;; Package-Requires: ((emacs "24.3") (let-alist "1.0.4") (websocket "1.4"))
 ;; Keywords: chrome edit textarea
 ;; Version: 0.1.0
 
