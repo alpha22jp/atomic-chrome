@@ -59,6 +59,8 @@ otherwise edit on Chrome is ignored while editing on Emacs."
   :type 'hook
   :group 'atomic-chrome)
 
+(defvar atomic-chrome-server-conn nil)
+
 (defvar atomic-chrome-ws-conn-list (make-hash-table :test 'equal))
 
 (defvar atomic-chrome-buffer-ws nil)
@@ -127,6 +129,23 @@ where FRAME show raw data received."
       (kill-buffer buffer))
     (remhash ws-conn atomic-chrome-ws-conn-list)))
 
+(defadvice save-buffers-kill-emacs
+      (before atomic-chrome-server-stop-before-kill-emacs)
+      "Call `atomic-chrome-close-server' before closing Emacs to avoid users \
+being prompted to kill the websocket server process."
+      (atomic-chrome-stop-server))
+
+(defun atomic-chrome-stop-server nil
+  "Stop websocket server for atomic-chrome."
+  (interactive)
+  (and atomic-chrome-server-conn
+       (websocket-server-close atomic-chrome-server-conn))
+  (ad-disable-advice 'save-buffers-kill-emacs
+                     'before 'atomic-chrome-server-stop-before-kill-emacs)
+  ;; Disabling advice doesn't take effect until you (re-)activate
+  ;; all advice for the function.
+  (ad-activate 'save-buffers-kill-emacs))
+
 (defvar atomic-chrome-edit-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-x C-s") 'atomic-chrome-send-buffer-text)
@@ -141,19 +160,18 @@ where FRAME show raw data received."
   :init-value nil
   :keymap atomic-chrome-edit-mode-map)
 
-(defvar atomic-chrome-server-conn
-      (websocket-server
-       64292
-       :host 'local
-       :on-message #'atomic-chrome-on-message
-       :on-open nil
-       :on-close #'atomic-chrome-on-close))
-
-(defadvice save-buffers-kill-emacs
-      (before atomic-chrome-server-stop-before-kill-emacs)
-      "Call `websocket-server-close' before closing Emacs to avoid users \
-being prompted to kill the websocket server process."
-      (websocket-server-close atomic-chrome-server-conn))
+(defun atomic-chrome-start-server ()
+  "Start websocket server for atomic-chrome."
+  (interactive)
+  (unless atomic-chrome-server-conn
+    (ad-activate 'save-buffers-kill-emacs)
+    (setq atomic-chrome-server-conn
+          (websocket-server
+           64292
+           :host 'local
+           :on-message #'atomic-chrome-on-message
+           :on-open nil
+           :on-close #'atomic-chrome-on-close))))
 
 (provide 'atomic-chrome)
 

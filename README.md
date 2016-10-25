@@ -30,6 +30,7 @@ Then add the following lines to your `.emacs`.
 
 ```.emacs
 (require 'atomic-chrome)
+(atomic-chrome-start-server)
 ```
 
 ## Usage
