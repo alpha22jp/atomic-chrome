@@ -54,6 +54,12 @@ otherwise edit on Chrome is ignored while editing on Emacs."
   :type 'boolean
   :group 'atomic-chrome)
 
+(defcustom atomic-chrome-default-major-mode
+  'text-mode
+  "Default major mode for editing buffer."
+  :type 'function
+  :group 'atomic-chrome)
+
 (defcustom atomic-chrome-edit-mode-hook nil
   "Customizable hook which run when the editing buffer is created."
   :type 'hook
@@ -86,6 +92,7 @@ otherwise edit on Chrome is ignored while editing on Emacs."
   "Create buffer associated with WS named TITLE, and insert TEXT to the buffer."
   (let ((buffer (generate-new-buffer title)))
     (with-current-buffer buffer
+      (funcall atomic-chrome-default-major-mode)
       (setq atomic-chrome-buffer-ws ws)
       (puthash (websocket-conn ws) (buffer-name) atomic-chrome-ws-conn-list)
       (atomic-chrome-edit-mode)
