@@ -12,7 +12,7 @@ This is the Emacs version of [Atomic Chrome](https://atom.io/packages/atomic-chr
 ## Requirements
 
 * Emacs: 24.3 or later
-* OS: Tested on Window and Linux
+* OS: Tested on Windows and Linux
 
 ## Installation
 
