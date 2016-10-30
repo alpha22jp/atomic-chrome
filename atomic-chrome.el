@@ -54,10 +54,16 @@ otherwise edit on Chrome is ignored while editing on Emacs."
   :type 'boolean
   :group 'atomic-chrome)
 
-(defcustom atomic-chrome-default-major-mode
-  'text-mode
+(defcustom atomic-chrome-default-major-mode 'text-mode
   "Default major mode for editing buffer."
   :type 'function
+  :group 'atomic-chrome)
+
+(defcustom atomic-chrome-url-major-mode-alist nil
+  "Association list of URL regexp and corresponding major mode \
+which is used to select major mode for specified website."
+  :type '(alist :key-type (string :tag "regexp")
+                :value-type (function :tag "major mode"))
   :group 'atomic-chrome)
 
 (defcustom atomic-chrome-edit-mode-hook nil
@@ -88,11 +94,23 @@ otherwise edit on Chrome is ignored while editing on Emacs."
                             (list '("type" . "updateText")
                                   (cons "payload" (list (cons "text" text)))))))))
 
-(defun atomic-chrome-create-buffer (ws title text)
-  "Create buffer associated with WS named TITLE, and insert TEXT to the buffer."
+(defun atomic-chrome-set-major-mode (url)
+  "Set major mode for editing buffer depending on URL.
+`atomic-chrome-url-major-mode-alist' can be used to select major mode.
+The specified major mode is used if URL matches to one of the alist,
+otherwise fallback to `atomic-chrome-default-major-mode'"
+  (funcall (or (and url (assoc-default url
+                                       atomic-chrome-url-major-mode-alist
+                                       'string-match))
+               atomic-chrome-default-major-mode)))
+
+(defun atomic-chrome-create-buffer (ws url title text)
+  "Create buffer associated with websocket specified by WS.
+URL is used to determine the major mode of the buffer created,
+TITLE is used for the buffer name and TEXT is inserted to the buffer."
   (let ((buffer (generate-new-buffer title)))
     (with-current-buffer buffer
-      (funcall atomic-chrome-default-major-mode)
+      (atomic-chrome-set-major-mode url)
       (setq atomic-chrome-buffer-ws ws)
       (puthash (websocket-conn ws) (buffer-name) atomic-chrome-ws-conn-list)
       (atomic-chrome-edit-mode)
@@ -121,7 +139,7 @@ where FRAME show raw data received."
                (string-make-unibyte (websocket-frame-payload frame)) 'utf-8))))
     (let-alist msg
       (cond ((string= .type "register")
-             (atomic-chrome-create-buffer ws .payload.title .payload.text))
+             (atomic-chrome-create-buffer ws .payload.url .payload.title .payload.text))
             ((string= .type "updateText")
              (when atomic-chrome-enable-bidirectional-edit
                (atomic-chrome-update-buffer ws .payload.text)))))))
