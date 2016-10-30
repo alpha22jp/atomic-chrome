@@ -28,7 +28,7 @@ Atomic Chrome for Emacs can be installed via MELPA as below.
 
 Then add the following lines to your `.emacs`.
 
-```.emacs
+``` emacs-lisp
 (require 'atomic-chrome)
 (atomic-chrome-start-server)
 ```
@@ -41,3 +41,23 @@ Then add the following lines to your `.emacs`.
 4. Contet of the text area is opened in a new buffer of Emacs.
 5. Edit content on Emacs buffer.
 6. <kbd>C-c C-c</kbd> or `M-x kill-buffer` to finish editing, or the buffer automatically killed if the browser closes the connection.
+
+## Customization
+
+### Set major mode for editing buffer
+
+The default major mode of editing buffer is `text-mode`. If you want to use a different major mode, set `atomic-chrome-default-major-mode` like below.
+
+``` emacs-lisp
+(setq atomic-chrome-default-major-mode 'markdown-mode)
+```
+
+Additionally, you can use `atomic-chrome-url-major-mode-alist` to choose the major mode for a specific website based on the page URL like below.
+
+``` emacs-lisp
+(setq atomic-chrome-url-major-mode-alist
+      '(("github\\.com" . gfm-mode)
+        ("redmine" . textile-mode)))
+```
+
+If the page URL matches the regexp specified, the corresponding major mode is selected.
