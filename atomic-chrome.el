@@ -83,6 +83,11 @@ which is used to select major mode for specified website."
   :type 'hook
   :group 'atomic-chrome)
 
+(defcustom atomic-chrome-edit-done-hook nil
+  "Customizable hook which run when the editing buffer is closed."
+  :type 'hook
+  :group 'atomic-chrome)
+
 (defvar atomic-chrome-server-conn nil)
 
 (defvar atomic-chrome-ws-conn-list (make-hash-table :test 'equal))
@@ -134,6 +139,12 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
           ((eq atomic-chrome-buffer-open-style 'split) (switch-to-buffer-other-window buffer))
           ((eq atomic-chrome-buffer-open-style 'frame) (switch-to-buffer-other-frame buffer)))))
 
+(defun atomic-chrome-close-edit-buffer ()
+  "Close edit buffer and connection from client."
+  (interactive)
+  (run-hooks 'atomic-chrome-edit-done-hook)
+  (kill-buffer-and-window))
+
 (defun atomic-chrome-update-buffer (ws text)
   "Update text on buffer associated with WS to TEXT."
   (let* ((buffer-name (gethash (websocket-conn ws) atomic-chrome-ws-conn-list))
@@ -169,7 +180,7 @@ where FRAME show raw data received."
 (defvar atomic-chrome-edit-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-x C-s") 'atomic-chrome-send-buffer-text)
-    (define-key map (kbd "C-c C-c") 'kill-buffer-and-window)
+    (define-key map (kbd "C-c C-c") 'atomic-chrome-close-edit-buffer)
     map)
   "Keymap for minor mode `atomic-chrome-edit-mode'.")
 
