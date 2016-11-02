@@ -88,7 +88,7 @@ which is used to select major mode for specified website."
 (defvar atomic-chrome-ws-conn-list (make-hash-table :test 'equal))
 
 (defvar atomic-chrome-buffer-ws nil)
-(make-variable-buffer-local 'atomic-chrome-buffer-ws)
+(make-local-variable 'atomic-chrome-buffer-ws)
 
 (defun atomic-chrome-close-connection ()
   "Close client connection associated with current buffer."
@@ -177,7 +177,7 @@ where FRAME show raw data received."
   "Minor mode enabled on buffers opened by Emacs Chrome server."
   :group 'atomic-chrome
   :lighter " AtomicChrome"
-  :init-value nil
+  :init-value t
   :keymap atomic-chrome-edit-mode-map)
 
 (defadvice save-buffers-kill-emacs
