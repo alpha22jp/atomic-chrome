@@ -54,6 +54,19 @@
                  (const :tag "Open buffer with new frame" frame))
   :group 'atomic-chrome)
 
+(defcustom atomic-chrome-new-frame-alist
+  '((name . "Atomic Chrome editing buffer frame")
+    (width . 80)
+    (height . 25)
+    (minibuffer . t)
+    (menu-bar-lines . t))
+  "Parameters for new frames.  See `default-frame-alist' for examples.
+If nil, the new frame will use the existing `default-frame-alist' values."
+  :group 'edit-server
+  :type '(repeat (cons :format "%v"
+		       (symbol :tag "Parameter")
+		       (sexp :tag "Value"))))
+
 (defcustom atomic-chrome-enable-auto-update t
   "If non-nil, edit on Emacs is reflected to Chrome instantly, \
 otherwise you need to type \"C-xC-s\" manually."
@@ -95,6 +108,9 @@ which is used to select major mode for specified website."
 (defvar atomic-chrome-buffer-ws nil)
 (make-variable-buffer-local 'atomic-chrome-buffer-ws)
 
+(defvar atomic-chrome-buffer-frame nil)
+(make-variable-buffer-local 'atomic-chrome-buffer-frame)
+
 (defun atomic-chrome-close-connection ()
   "Close client connection associated with current buffer."
   (when atomic-chrome-buffer-ws
@@ -121,6 +137,29 @@ otherwise fallback to `atomic-chrome-default-major-mode'"
                                        'string-match))
                atomic-chrome-default-major-mode)))
 
+(defun atomic-chrome-show-edit-buffer (buffer)
+  "Show edit BUFFER by creating a frame or raising the selected frame."
+  (let ((edit-frame nil))
+    (when (eq atomic-chrome-buffer-open-style 'frame)
+      (setq edit-frame
+            (if (memq window-system '(ns mac nil))
+                ;; Aquamacs, Emacs NS, Emacs (experimental) Mac port, termcap.
+                ;; matching (nil) avoids use of DISPLAY from TTY environments.
+                (make-frame atomic-chrome-new-frame-alist)
+              (make-frame-on-display (getenv "DISPLAY")
+                                     atomic-chrome-new-frame-alist)))
+      (select-frame edit-frame)
+      (when (and (eq window-system 'x)
+                 (fboundp 'x-send-client-message))
+        (x-send-client-message nil 0 nil "_NET_ACTIVE_WINDOW" 32
+                               '(1 0 0))))
+    (if (eq atomic-chrome-buffer-open-style 'split)
+        (pop-to-buffer buffer)
+      (switch-to-buffer buffer))
+    (raise-frame edit-frame)
+    (select-frame-set-input-focus (window-frame (selected-window)))
+    edit-frame))
+
 (defun atomic-chrome-create-buffer (ws url title text)
   "Create buffer associated with websocket specified by WS.
 URL is used to determine the major mode of the buffer created,
@@ -134,16 +173,19 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
       (add-hook 'kill-buffer-hook 'atomic-chrome-close-connection nil t)
       (when atomic-chrome-enable-auto-update
         (add-hook 'post-command-hook 'atomic-chrome-send-buffer-text nil t))
-      (insert text))
-    (cond ((eq atomic-chrome-buffer-open-style 'full) (switch-to-buffer buffer))
-          ((eq atomic-chrome-buffer-open-style 'split) (switch-to-buffer-other-window buffer))
-          ((eq atomic-chrome-buffer-open-style 'frame) (switch-to-buffer-other-frame buffer)))))
+      (insert text)
+      (setq atomic-chrome-buffer-frame
+          (atomic-chrome-show-edit-buffer buffer)))))
 
 (defun atomic-chrome-close-edit-buffer ()
   "Close edit buffer and connection from client."
   (interactive)
-  (run-hooks 'atomic-chrome-edit-done-hook)
-  (kill-buffer-and-window))
+  (let ((buffer (current-buffer)))
+    (save-restriction
+      (run-hooks 'atomic-chrome-edit-done-hook)
+      (when atomic-chrome-buffer-frame
+        (delete-frame atomic-chrome-buffer-frame))
+      (kill-buffer buffer))))
 
 (defun atomic-chrome-update-buffer (ws text)
   "Update text on buffer associated with WS to TEXT."
