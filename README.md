@@ -40,7 +40,7 @@ Then add the following lines to your `.emacs`.
 3. Press Atomic Chrome button on the tool bar.
 4. Contet of the text area is opened in a new buffer of Emacs.
 5. Edit content on Emacs buffer.
-6. <kbd>C-c C-c</kbd> or `M-x kill-buffer` to finish editing, or the buffer automatically killed if the browser closes the connection.
+6. <kbd>C-c C-c</kbd> to finish editing, or the buffer automatically killed if the browser closes the connection.
 
 ## Customization
 
@@ -60,4 +60,22 @@ Additionally, you can use `atomic-chrome-url-major-mode-alist` to choose the maj
         ("redmine" . textile-mode)))
 ```
 
-If the page URL matches the regexp specified, the corresponding major mode is selected.
+This is an association list of regexp and major mode function. If the page URL matches to on of the regexp, the corresponding major mode is selected.
+
+### Select editing buffer style
+
+You can select the style of opening the editing buffer by `atomic-chrome-buffer-open-style` like below.
+
+``` emacs-lisp
+(setq atomic-chrome-buffer-open-style 'frame)
+```
+
+Available values are the followings.
+
+* `full`: Open in the selected window.
+* `split`: Open in the new window by splitting the selected window (default).
+* `frame`: Create a new frame and window in it.
+
+`frame` is available only when you are using Emacs on some window system.
+
+If you select `frame`, you can also set the width and height of the frame with `atomic-chrome-buffer-frame-width` and `atomic-chrome-buffer-frame-height`. Their default values are `80` and `25`.
