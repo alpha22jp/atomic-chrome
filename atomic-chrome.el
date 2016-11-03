@@ -147,11 +147,7 @@ otherwise fallback to `atomic-chrome-default-major-mode'"
                 (make-frame atomic-chrome-new-frame-alist)
               (make-frame-on-display (getenv "DISPLAY")
                                      atomic-chrome-new-frame-alist)))
-      (select-frame edit-frame)
-      (when (and (eq window-system 'x)
-                 (fboundp 'x-send-client-message))
-        (x-send-client-message nil 0 nil "_NET_ACTIVE_WINDOW" 32
-                               '(1 0 0))))
+      (select-frame edit-frame))
     (if (eq atomic-chrome-buffer-open-style 'split)
         (pop-to-buffer buffer)
       (switch-to-buffer buffer))
