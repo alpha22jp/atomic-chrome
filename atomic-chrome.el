@@ -142,9 +142,8 @@ otherwise fallback to `atomic-chrome-default-major-mode'"
   (let ((edit-frame nil))
     (when (eq atomic-chrome-buffer-open-style 'frame)
       (setq edit-frame
-            (if (memq window-system '(ns mac nil))
-                ;; Aquamacs, Emacs NS, Emacs (experimental) Mac port, termcap.
-                ;; matching (nil) avoids use of DISPLAY from TTY environments.
+            (if (memq window-system '(ns mac))
+                ;; Avoid using make-frame-on-display for Mac OS.
                 (make-frame atomic-chrome-new-frame-alist)
               (make-frame-on-display (getenv "DISPLAY")
                                      atomic-chrome-new-frame-alist)))
