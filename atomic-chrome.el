@@ -54,18 +54,15 @@
                  (const :tag "Open buffer with new frame" frame))
   :group 'atomic-chrome)
 
-(defcustom atomic-chrome-new-frame-alist
-  '((name . "Atomic Chrome editing buffer frame")
-    (width . 80)
-    (height . 25)
-    (minibuffer . t)
-    (menu-bar-lines . t))
-  "Parameters for new frames.  See `default-frame-alist' for examples.
-If nil, the new frame will use the existing `default-frame-alist' values."
-  :group 'edit-server
-  :type '(repeat (cons :format "%v"
-		       (symbol :tag "Parameter")
-		       (sexp :tag "Value"))))
+(defcustom atomic-chrome-buffer-frame-width 80
+  "Width of editing buffer frame."
+  :type 'integer
+  :group 'atomic-chrome)
+
+(defcustom atomic-chrome-buffer-frame-height 25
+  "Height of editing buffer frame."
+  :type 'integer
+  :group 'atomic-chrome)
 
 (defcustom atomic-chrome-enable-auto-update t
   "If non-nil, edit on Emacs is reflected to Chrome instantly, \
@@ -137,16 +134,19 @@ otherwise fallback to `atomic-chrome-default-major-mode'"
                                        'string-match))
                atomic-chrome-default-major-mode)))
 
-(defun atomic-chrome-show-edit-buffer (buffer)
-  "Show edit BUFFER by creating a frame or raising the selected frame."
-  (let ((edit-frame nil))
+(defun atomic-chrome-show-edit-buffer (buffer title)
+  "Show editing buffer BUFFER by creating a frame with title TITLE, \
+or raising the selected frame depending on `atomic-chrome-buffer-open-style'."
+  (let ((edit-frame nil)
+        (frame-params (list (cons 'name (format "Atomic Chrome: %s" title))
+                            (cons 'width atomic-chrome-buffer-frame-width)
+                            (cons 'height atomic-chrome-buffer-frame-height))))
     (when (eq atomic-chrome-buffer-open-style 'frame)
       (setq edit-frame
             (if (memq window-system '(ns mac))
                 ;; Avoid using make-frame-on-display for Mac OS.
-                (make-frame atomic-chrome-new-frame-alist)
-              (make-frame-on-display (getenv "DISPLAY")
-                                     atomic-chrome-new-frame-alist)))
+                (make-frame frame-params)
+              (make-frame-on-display (getenv "DISPLAY") frame-params)))
       (select-frame edit-frame))
     (if (eq atomic-chrome-buffer-open-style 'split)
         (pop-to-buffer buffer)
@@ -170,7 +170,7 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
         (add-hook 'post-command-hook 'atomic-chrome-send-buffer-text nil t))
       (insert text)
       (setq atomic-chrome-buffer-frame
-          (atomic-chrome-show-edit-buffer buffer)))))
+          (atomic-chrome-show-edit-buffer buffer title)))))
 
 (defun atomic-chrome-close-edit-buffer ()
   "Close edit buffer and connection from client."
