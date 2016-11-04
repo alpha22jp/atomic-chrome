@@ -179,15 +179,11 @@ URL is used to determine the major mode of the buffer created,
 TITLE is used for the buffer name and TEXT is inserted to the buffer."
   (let ((buffer (generate-new-buffer title)))
     (with-current-buffer buffer
-      (atomic-chrome-set-major-mode url)
-      (atomic-chrome-edit-mode)
-      (add-hook 'kill-buffer-hook 'atomic-chrome-close-connection nil t)
-      (when atomic-chrome-enable-auto-update
-        (add-hook 'post-command-hook 'atomic-chrome-send-buffer-text nil t))
-      (insert text))
-    (puthash buffer
+      (puthash buffer
              (list ws (atomic-chrome-show-edit-buffer buffer title))
-             atomic-chrome-buffer-table)))
+             atomic-chrome-buffer-table)
+      (atomic-chrome-set-major-mode url)
+      (insert text))))
 
 (defun atomic-chrome-close-edit-buffer (buffer)
   "Close buffer BUFFER if it's one of Atomic Chrome edit buffers."
@@ -242,7 +238,20 @@ where FRAME show raw data received."
   :group 'atomic-chrome
   :lighter " AtomicChrome"
   :init-value nil
-  :keymap atomic-chrome-edit-mode-map)
+  :keymap atomic-chrome-edit-mode-map
+  (when atomic-chrome-edit-mode
+    (add-hook 'kill-buffer-hook 'atomic-chrome-close-connection nil t)
+    (when atomic-chrome-enable-auto-update
+      (add-hook 'post-command-hook 'atomic-chrome-send-buffer-text nil t))))
+
+(defun atomic-chrome-turn-on-edit-mode ()
+  "Turn on `atomic-chrome-edit-mode' if the buffer is an editing buffer."
+  (when (gethash (current-buffer) atomic-chrome-buffer-table)
+    (atomic-chrome-edit-mode t)))
+
+(define-global-minor-mode global-atomic-chrome-edit-mode
+  atomic-chrome-edit-mode atomic-chrome-turn-on-edit-mode)
+(global-atomic-chrome-edit-mode t)
 
 (defadvice save-buffers-kill-emacs
       (before atomic-chrome-server-stop-before-kill-emacs)
