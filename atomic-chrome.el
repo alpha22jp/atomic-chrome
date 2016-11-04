@@ -251,7 +251,6 @@ where FRAME show raw data received."
 
 (define-global-minor-mode global-atomic-chrome-edit-mode
   atomic-chrome-edit-mode atomic-chrome-turn-on-edit-mode)
-(global-atomic-chrome-edit-mode t)
 
 (defadvice save-buffers-kill-emacs
       (before atomic-chrome-server-stop-before-kill-emacs)
@@ -264,6 +263,7 @@ being prompted to kill the websocket server process."
   "Start websocket server for atomic-chrome."
   (interactive)
   (unless atomic-chrome-server-conn
+    (global-atomic-chrome-edit-mode 1)
     (ad-activate 'save-buffers-kill-emacs)
     (setq atomic-chrome-server-conn
           (websocket-server
@@ -277,13 +277,15 @@ being prompted to kill the websocket server process."
 (defun atomic-chrome-stop-server nil
   "Stop websocket server for atomic-chrome."
   (interactive)
-  (and atomic-chrome-server-conn
-       (websocket-server-close atomic-chrome-server-conn))
+  (when atomic-chrome-server-conn
+    (websocket-server-close atomic-chrome-server-conn)
+    (setq atomic-chrome-server-conn nil))
   (ad-disable-advice 'save-buffers-kill-emacs
                      'before 'atomic-chrome-server-stop-before-kill-emacs)
   ;; Disabling advice doesn't take effect until you (re-)activate
   ;; all advice for the function.
-  (ad-activate 'save-buffers-kill-emacs))
+  (ad-activate 'save-buffers-kill-emacs)
+  (global-atomic-chrome-edit-mode 0))
 
 (provide 'atomic-chrome)
 
