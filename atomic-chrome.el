@@ -38,6 +38,7 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'cl))
 (require 'json)
 (require 'let-alist)
 (require 'websocket)
@@ -100,26 +101,43 @@ which is used to select major mode for specified website."
 
 (defvar atomic-chrome-server-conn nil)
 
-(defvar atomic-chrome-ws-conn-list (make-hash-table :test 'equal))
+(defvar atomic-chrome-buffer-table (make-hash-table :test 'equal)
+  "Hash table of editing buffer and its assciated data.
+Each element has a list consisting of (websocket, frame).")
 
-(defvar atomic-chrome-buffer-ws nil)
-(make-variable-buffer-local 'atomic-chrome-buffer-ws)
+(defun atomic-chrome-get-websocket (buffer)
+  "Lookup websocket associated with buffer BUFFER \
+from `atomic-chrome-buffer-table'."
+  (nth 0 (gethash buffer atomic-chrome-buffer-table)))
 
-(defvar atomic-chrome-buffer-frame nil)
-(make-variable-buffer-local 'atomic-chrome-buffer-frame)
+(defun atomic-chrome-get-frame (buffer)
+  "Lookup frame associated with buffer BUFFER \
+from `atomic-chrome-buffer-table'."
+  (nth 1 (gethash buffer atomic-chrome-buffer-table)))
+
+(defun atomic-chrome-get-buffer-by-socket (socket)
+  "Lookup buffer which is associated to the websocket SOCKET \
+from `atomic-chrome-buffer-table'."
+  (let (buffer)
+    (cl-loop for key being the hash-keys of atomic-chrome-buffer-table
+             using (hash-values val)
+             do (when (equal (nth 0 val) socket) (setq buffer key)))
+    buffer))
 
 (defun atomic-chrome-close-connection ()
   "Close client connection associated with current buffer."
-  (when atomic-chrome-buffer-ws
-    (remhash (websocket-conn atomic-chrome-buffer-ws) atomic-chrome-ws-conn-list)
-    (websocket-close atomic-chrome-buffer-ws)))
+  (let ((socket (atomic-chrome-get-websocket (current-buffer))))
+    (when socket
+      (remhash (current-buffer) atomic-chrome-buffer-table)
+      (websocket-close socket))))
 
 (defun atomic-chrome-send-buffer-text ()
   "Send request to update text with current buffer content."
   (interactive)
-  (let ((text (buffer-substring-no-properties (point-min) (point-max))))
-    (when (and atomic-chrome-buffer-ws text)
-      (websocket-send-text atomic-chrome-buffer-ws
+  (let ((socket (atomic-chrome-get-websocket (current-buffer)))
+        (text (buffer-substring-no-properties (point-min) (point-max))))
+    (when (and socket text)
+      (websocket-send-text socket
                            (json-encode
                             (list '("type" . "updateText")
                                   (cons "payload" (list (cons "text" text)))))))))
@@ -162,29 +180,32 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
   (let ((buffer (generate-new-buffer title)))
     (with-current-buffer buffer
       (atomic-chrome-set-major-mode url)
-      (setq atomic-chrome-buffer-ws ws)
-      (puthash (websocket-conn ws) (buffer-name) atomic-chrome-ws-conn-list)
       (atomic-chrome-edit-mode)
       (add-hook 'kill-buffer-hook 'atomic-chrome-close-connection nil t)
       (when atomic-chrome-enable-auto-update
         (add-hook 'post-command-hook 'atomic-chrome-send-buffer-text nil t))
-      (insert text)
-      (setq atomic-chrome-buffer-frame
-          (atomic-chrome-show-edit-buffer buffer title)))))
+      (insert text))
+    (puthash buffer
+             (list ws (atomic-chrome-show-edit-buffer buffer title))
+             atomic-chrome-buffer-table)))
 
-(defun atomic-chrome-close-edit-buffer ()
-  "Close edit buffer and connection from client."
+(defun atomic-chrome-close-edit-buffer (buffer)
+  "Close buffer BUFFER if it's one of Atomic Chrome edit buffers."
+  (let ((frame (atomic-chrome-get-frame buffer)))
+    (with-current-buffer buffer
+      (save-restriction
+        (run-hooks 'atomic-chrome-edit-done-hook)
+        (when frame (delete-frame frame))
+        (kill-buffer buffer)))))
+
+(defun atomic-chrome-close-current-buffer ()
+  "Close current buffer and connection from client."
   (interactive)
-  (let ((buffer (current-buffer)))
-    (save-restriction
-      (run-hooks 'atomic-chrome-edit-done-hook)
-      (when atomic-chrome-buffer-frame
-        (delete-frame atomic-chrome-buffer-frame))
-      (kill-buffer buffer))))
+  (atomic-chrome-close-edit-buffer (current-buffer)))
 
 (defun atomic-chrome-update-buffer (ws text)
   "Update text on buffer associated with WS to TEXT."
-  (let* ((buffer-name (gethash (websocket-conn ws) atomic-chrome-ws-conn-list))
+  (let* ((buffer-name (gethash (websocket-conn ws) atomic-chrome-buffer-table))
          (buffer (if buffer-name (get-buffer buffer-name) nil)))
     (when buffer
       (with-current-buffer buffer
@@ -204,20 +225,15 @@ where FRAME show raw data received."
              (when atomic-chrome-enable-bidirectional-edit
                (atomic-chrome-update-buffer ws .payload.text)))))))
 
-(defun atomic-chrome-on-close (ws)
-  "Function to handle request from client to close connection specified by WS."
-  (let* ((ws-conn (websocket-conn ws))
-         (buffer-name (gethash ws-conn atomic-chrome-ws-conn-list))
-         (buffer (if buffer-name (get-buffer buffer-name) nil)))
-    (when buffer
-      (with-current-buffer buffer (setq atomic-chrome-buffer-ws nil))
-      (kill-buffer buffer))
-    (remhash ws-conn atomic-chrome-ws-conn-list)))
+(defun atomic-chrome-on-close (socket)
+  "Function to handle request from client to close websocket SOCKET."
+  (let ((buffer (atomic-chrome-get-buffer-by-socket socket)))
+    (when buffer (atomic-chrome-close-edit-buffer buffer))))
 
 (defvar atomic-chrome-edit-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-x C-s") 'atomic-chrome-send-buffer-text)
-    (define-key map (kbd "C-c C-c") 'atomic-chrome-close-edit-buffer)
+    (define-key map (kbd "C-c C-c") 'atomic-chrome-close-current-buffer)
     map)
   "Keymap for minor mode `atomic-chrome-edit-mode'.")
 
