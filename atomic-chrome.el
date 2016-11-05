@@ -6,7 +6,7 @@
 ;; Package-Requires: ((emacs "24.3") (let-alist "1.0.4") (websocket "1.4"))
 ;; Keywords: chrome edit textarea
 ;; URL: https://github.com/alpha22jp/atomic-chrome
-;; Version: 0.1.0
+;; Version: 1.0.0
 
 ;; This program is free software; you can redistribute it and/or modify it under
 ;; the terms of the GNU General Public License as published by the Free Software
@@ -24,17 +24,16 @@
 
 ;;; Commentary:
 
-;; This is the Emacs version of [Atomic Chrome](https://atom.io/packages/atomic-chrome)
-;; which is an extension for Google Chrome browser that allows you to edit text
-;; areas of the browser in Emacs.
+;; This is the Emacs version of Atomic Chrome which is an extension for Google
+;; Chrome browser that allows you to edit text areas of the browser in Emacs.
 ;;
-;; It's similar to [Edit with Emacs](https://www.emacswiki.org/emacs/Edit_with_Emacs),
-;; but has some advantages as below with the help of websocket.
+;; It's similar to Edit with Emacs, but has some advantages as below with the
+;; help of websocket.
 ;;
 ;; * Live update
 ;;   The input on Emacs is reflected to the browser instantly and continuously.
-;; * Bi-directional communication
-;;   You can use both the browser and Emacs, they are synced to the same.
+;; * Bidirectional communication
+;;   You can edit both on the browser and Emacs, they are synced to the same.
 
 ;;; Code:
 
