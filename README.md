@@ -1,6 +1,6 @@
 # Atomic Chrome for Emacs [![MELPA](http://melpa.org/packages/atomic-chrome-badge.svg)](http://melpa.org/#/atomic-chrome)
 
-This is the Emacs version of [Atomic Chrome](https://atom.io/packages/atomic-chrome) which is an extension for Google Chrome browser that allows you to edit text areas of the browser in Emacs. It's similar to [Edit with Emacs](https://www.emacswiki.org/emacs/Edit_with_Emacs), but has some advantages as below with the help of websocket.
+This is the Emacs version of [Atomic Chrome](https://github.com/tuvistavie/atomic-chrome) which is an extension for Google Chrome browser that allows you to edit text areas of the browser in Emacs. It's similar to [Edit with Emacs](https://github.com/stsquad/emacs_chrome), but has some advantages as below with the help of websocket.
 
 * The input on Emacs is reflected to the browser instantly and continuously.
 * You can use both the browser and Emacs at the same time. They are updated to the same content bi-directionally.
@@ -18,7 +18,7 @@ This is the Emacs version of [Atomic Chrome](https://atom.io/packages/atomic-chr
 
 ### For Chrome
 
-Atomic Chrome for Emacs shares [Atomic Chrome](https://atom.io/packages/atomic-chrome) as an extension on Chrome. Just install and setup it.
+Atomic Chrome for Emacs shares [extension for Chrome](https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc) with Atomic Chrome. Just install and setup it.
 
 ### For Emacs
 
@@ -40,13 +40,13 @@ Then add the following lines to your `.emacs`.
 3. Press Atomic Chrome button on the tool bar.
 4. Contet of the text area is opened in a new buffer of Emacs.
 5. Edit content on Emacs buffer.
-6. <kbd>C-c C-c</kbd> to finish editing, or the buffer automatically killed if the browser closes the connection.
+6. <kbd>C-c C-c</kbd> to finish editing, or the buffer killed if the browser closes the connection.
 
 ## Customization
 
 ### Set major mode for editing buffer
 
-The default major mode of editing buffer is `text-mode`. If you want to use a different major mode, set `atomic-chrome-default-major-mode` like below.
+The default major mode of editing buffer is `text-mode`. You can change the major mode manually. If you want to use a different major mode as the default, set `atomic-chrome-default-major-mode` like below.
 
 ``` emacs-lisp
 (setq atomic-chrome-default-major-mode 'markdown-mode)
