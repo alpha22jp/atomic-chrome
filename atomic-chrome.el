@@ -172,14 +172,14 @@ or raising the selected frame depending on `atomic-chrome-buffer-open-style'."
     (select-frame-set-input-focus (window-frame (selected-window)))
     edit-frame))
 
-(defun atomic-chrome-create-buffer (ws url title text)
-  "Create buffer associated with websocket specified by WS.
+(defun atomic-chrome-create-buffer (socket url title text)
+  "Create buffer associated with websocket specified by SOCKET.
 URL is used to determine the major mode of the buffer created,
 TITLE is used for the buffer name and TEXT is inserted to the buffer."
   (let ((buffer (generate-new-buffer title)))
     (with-current-buffer buffer
       (puthash buffer
-             (list ws (atomic-chrome-show-edit-buffer buffer title))
+             (list socket (atomic-chrome-show-edit-buffer buffer title))
              atomic-chrome-buffer-table)
       (atomic-chrome-set-major-mode url)
       (insert text))))
@@ -206,18 +206,18 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
         (erase-buffer)
         (insert text)))))
 
-(defun atomic-chrome-on-message (ws frame)
-  "Function to handle data received from websocket client specified by WS, \
+(defun atomic-chrome-on-message (socket frame)
+  "Function to handle data received from websocket client specified by SOCKET, \
 where FRAME show raw data received."
   (let ((msg (json-read-from-string
               (decode-coding-string
                (string-make-unibyte (websocket-frame-payload frame)) 'utf-8))))
     (let-alist msg
       (cond ((string= .type "register")
-             (atomic-chrome-create-buffer ws .payload.url .payload.title .payload.text))
+             (atomic-chrome-create-buffer socket .payload.url .payload.title .payload.text))
             ((string= .type "updateText")
              (when atomic-chrome-enable-bidirectional-edit
-               (atomic-chrome-update-buffer ws .payload.text)))))))
+               (atomic-chrome-update-buffer socket .payload.text)))))))
 
 (defun atomic-chrome-on-close (socket)
   "Function to handle request from client to close websocket SOCKET."
