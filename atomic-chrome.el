@@ -198,10 +198,9 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
   (interactive)
   (atomic-chrome-close-edit-buffer (current-buffer)))
 
-(defun atomic-chrome-update-buffer (ws text)
-  "Update text on buffer associated with WS to TEXT."
-  (let* ((buffer-name (gethash (websocket-conn ws) atomic-chrome-buffer-table))
-         (buffer (if buffer-name (get-buffer buffer-name) nil)))
+(defun atomic-chrome-update-buffer (socket text)
+  "Update text on buffer associated with SOCKET to TEXT."
+  (let ((buffer (atomic-chrome-get-buffer-by-socket socket)))
     (when buffer
       (with-current-buffer buffer
         (erase-buffer)
