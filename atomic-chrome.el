@@ -47,6 +47,12 @@
   :prefix "atomic-chrome-"
   :group 'applications)
 
+(defcustom atomic-chrome-extension-type 'atomic-chrome
+  "Chrome extension type."
+  :type '(choice (const :tag "Atomic Chrome" atomic-chrome)
+                 (const :tag "Ghost Text" ghost-text))
+  :group 'atomic-chrome)
+
 (defcustom atomic-chrome-buffer-open-style 'split
   "Specify the style to open new buffer for editing."
   :type '(choice (const :tag "Open buffer with full window" full)
@@ -138,8 +144,10 @@ from `atomic-chrome-buffer-table'."
     (when (and socket text)
       (websocket-send-text socket
                            (json-encode
-                            (list '("type" . "updateText")
-                                  (cons "payload" (list (cons "text" text)))))))))
+                            (if (eq atomic-chrome-extension-type 'ghost-text)
+                                (list (cons "text" text))
+                              (list '("type" . "updateText")
+                                    (cons "payload" (list (cons "text" text))))))))))
 
 (defun atomic-chrome-set-major-mode (url)
   "Set major mode for editing buffer depending on URL.
@@ -213,11 +221,15 @@ where FRAME show raw data received."
               (decode-coding-string
                (string-make-unibyte (websocket-frame-payload frame)) 'utf-8))))
     (let-alist msg
-      (cond ((string= .type "register")
-             (atomic-chrome-create-buffer socket .payload.url .payload.title .payload.text))
-            ((string= .type "updateText")
-             (when atomic-chrome-enable-bidirectional-edit
-               (atomic-chrome-update-buffer socket .payload.text)))))))
+      (if (eq atomic-chrome-extension-type 'ghost-text)
+          (if (atomic-chrome-get-buffer-by-socket socket)
+              (atomic-chrome-update-buffer socket .text)
+            (atomic-chrome-create-buffer socket .url .title .text))
+        (cond ((string= .type "register")
+               (atomic-chrome-create-buffer socket .payload.url .payload.title .payload.text))
+              ((string= .type "updateText")
+               (when atomic-chrome-enable-bidirectional-edit
+                 (atomic-chrome-update-buffer socket .payload.text))))))))
 
 (defun atomic-chrome-on-close (socket)
   "Function to handle request from client to close websocket SOCKET."
@@ -284,6 +296,56 @@ being prompted to kill the websocket server process."
   ;; all advice for the function.
   (ad-activate 'save-buffers-kill-emacs)
   (global-atomic-chrome-edit-mode 0))
+
+(defun atomic-chrome-httpd-start ()
+  "Start the HTTP server for Ghost Text."
+  (interactive)
+  (make-network-process
+   :name "atomic-chrome-httpd"
+   :family 'ipv4
+   :host 'local
+   :service 4001
+   :filter 'atomic-chrome-httpd-process-filter
+   :filter-multibyte nil
+   :server t))
+
+(defun atomic-chrome-normalize-header (header)
+  "Destructively capitalize the components of HEADER."
+  (mapconcat #'capitalize (split-string header "-") "-"))
+
+(defun atomic-chrome-httpd-parse-string (string)
+  "Parse client http header STRING into alist."
+  (let* ((lines (split-string string "[\n\r]+"))
+         (req (list (split-string (car lines))))
+         (post (cadr (split-string string "\r\n\r\n"))))
+    (dolist (line (butlast (cdr lines)))
+      (push (list (atomic-chrome-normalize-header (car (split-string line ": ")))
+                  (mapconcat #'identity
+                             (cdr (split-string line ": ")) ": "))
+            req))
+    (push (list "Content" post) req)
+    (reverse req)))
+
+(defun atomic-chrome-httpd-process-filter (proc string)
+  "Process filter of PROC which run each time client make a request.
+STRING is the string process received."
+  (setf string (concat (process-get proc :previous-string) string))
+  (let* ((request (atomic-chrome-httpd-parse-string string))
+         (content-length (cadr (assoc "Content-Length" request)))
+         (uri (cl-cadar request))
+         (content (cadr (assoc "Content" request))))
+    (if (and content-length
+             (< (string-bytes content) (string-to-number content-length)))
+        (process-put proc :previous-string string)
+      (atomic-chrome-httpd-send-response proc))))
+
+(defun atomic-chrome-httpd-send-response (proc)
+  "Send an HTTP 200 OK response back to process PROC."
+  (when (processp proc)
+    (let ((header "HTTP/1.0 200 OK\nContent-Type: application/json\n")
+          (body (json-encode '(:ProtocolVersion 1 :WebSocketPort 64292))))
+      (process-send-string proc (concat header "\n" body))
+      (process-send-eof proc))))
 
 (provide 'atomic-chrome)
 
