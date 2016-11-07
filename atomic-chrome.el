@@ -47,10 +47,10 @@
   :prefix "atomic-chrome-"
   :group 'applications)
 
-(defcustom atomic-chrome-extension-type 'atomic-chrome
-  "Chrome extension type."
-  :type '(choice (const :tag "Atomic Chrome" atomic-chrome)
-                 (const :tag "Ghost Text" ghost-text))
+(defcustom atomic-chrome-extension-type-list '(atomic-chrome ghost-text)
+  "List of chrome extension type available."
+  :type '(repeat (choice (const :tag "Atomic Chrome" atomic-chrome)
+                         (const :tag "Ghost Text" ghost-text)))
   :group 'atomic-chrome)
 
 (defcustom atomic-chrome-buffer-open-style 'split
@@ -104,7 +104,11 @@ which is used to select major mode for specified website."
   :type 'hook
   :group 'atomic-chrome)
 
-(defvar atomic-chrome-server-conn nil)
+(defvar atomic-chrome-server-atomic-chrome nil
+  "Websocket server connection handle for Atomic Chrome.")
+
+(defvar atomic-chrome-server-ghost-text nil
+  "Websocket server connection handle for Ghost Text.")
 
 (defvar atomic-chrome-buffer-table (make-hash-table :test 'equal)
   "Hash table of editing buffer and its assciated data.
@@ -142,12 +146,13 @@ from `atomic-chrome-buffer-table'."
   (let ((socket (atomic-chrome-get-websocket (current-buffer)))
         (text (buffer-substring-no-properties (point-min) (point-max))))
     (when (and socket text)
-      (websocket-send-text socket
-                           (json-encode
-                            (if (eq atomic-chrome-extension-type 'ghost-text)
-                                (list (cons "text" text))
-                              (list '("type" . "updateText")
-                                    (cons "payload" (list (cons "text" text))))))))))
+      (websocket-send-text
+       socket
+       (json-encode
+        (if (eq (websocket-server-conn socket) atomic-chrome-server-ghost-text)
+            (list (cons "text" text))
+          (list '("type" . "updateText")
+                (cons "payload" (list (cons "text" text))))))))))
 
 (defun atomic-chrome-set-major-mode (url)
   "Set major mode for editing buffer depending on URL.
@@ -221,7 +226,7 @@ where FRAME show raw data received."
               (decode-coding-string
                (string-make-unibyte (websocket-frame-payload frame)) 'utf-8))))
     (let-alist msg
-      (if (eq atomic-chrome-extension-type 'ghost-text)
+      (if (eq (websocket-server-conn socket) atomic-chrome-server-ghost-text)
           (if (atomic-chrome-get-buffer-by-socket socket)
               (atomic-chrome-update-buffer socket .text)
             (atomic-chrome-create-buffer socket .url .title .text))
@@ -268,37 +273,17 @@ where FRAME show raw data received."
 being prompted to kill the websocket server process."
       (atomic-chrome-stop-server))
 
-;;;###autoload
-(defun atomic-chrome-start-server ()
-  "Start websocket server for atomic-chrome."
-  (interactive)
-  (unless atomic-chrome-server-conn
-    (global-atomic-chrome-edit-mode 1)
-    (ad-activate 'save-buffers-kill-emacs)
-    (setq atomic-chrome-server-conn
-          (websocket-server
-           64292
-           :host 'local
-           :on-message #'atomic-chrome-on-message
-           :on-open nil
-           :on-close #'atomic-chrome-on-close))))
+(defun atomic-chrome-start-websocket-server (port)
+  "Create websocket server on port PORT."
+  (websocket-server
+   port
+   :host 'local
+   :on-message #'atomic-chrome-on-message
+   :on-open nil
+   :on-close #'atomic-chrome-on-close))
 
-;;;###autoload
-(defun atomic-chrome-stop-server nil
-  "Stop websocket server for atomic-chrome."
-  (interactive)
-  (when atomic-chrome-server-conn
-    (websocket-server-close atomic-chrome-server-conn)
-    (setq atomic-chrome-server-conn nil))
-  (ad-disable-advice 'save-buffers-kill-emacs
-                     'before 'atomic-chrome-server-stop-before-kill-emacs)
-  ;; Disabling advice doesn't take effect until you (re-)activate
-  ;; all advice for the function.
-  (ad-activate 'save-buffers-kill-emacs)
-  (global-atomic-chrome-edit-mode 0))
-
-(defun atomic-chrome-httpd-start ()
-  "Start the HTTP server for Ghost Text."
+(defun atomic-chrome-start-httpd ()
+  "Start the HTTP server for Ghost Text query."
   (interactive)
   (make-network-process
    :name "atomic-chrome-httpd"
@@ -342,10 +327,46 @@ STRING is the string process received."
 (defun atomic-chrome-httpd-send-response (proc)
   "Send an HTTP 200 OK response back to process PROC."
   (when (processp proc)
+    (unless atomic-chrome-server-ghost-text
+      (setq atomic-chrome-server-ghost-text
+            (atomic-chrome-start-websocket-server 64293)))
     (let ((header "HTTP/1.0 200 OK\nContent-Type: application/json\n")
-          (body (json-encode '(:ProtocolVersion 1 :WebSocketPort 64292))))
+          (body (json-encode '(:ProtocolVersion 1 :WebSocketPort 64293))))
       (process-send-string proc (concat header "\n" body))
       (process-send-eof proc))))
+
+;;;###autoload
+(defun atomic-chrome-start-server ()
+  "Start websocket server for atomic-chrome."
+  (interactive)
+  (and (not atomic-chrome-server-atomic-chrome)
+       (memq 'atomic-chrome atomic-chrome-extension-type-list)
+       (setq atomic-chrome-server-atomic-chrome
+             (atomic-chrome-start-websocket-server 64292)))
+  (and (not (process-status "atomic-chrome-httpd"))
+       (memq 'ghost-text atomic-chrome-extension-type-list)
+       (atomic-chrome-start-httpd))
+  (global-atomic-chrome-edit-mode 1)
+  (ad-activate 'save-buffers-kill-emacs))
+
+;;;###autoload
+(defun atomic-chrome-stop-server nil
+  "Stop websocket server for atomic-chrome."
+  (interactive)
+  (when atomic-chrome-server-atomic-chrome
+    (websocket-server-close atomic-chrome-server-atomic-chrome)
+    (setq atomic-chrome-server-atomic-chrome nil))
+  (when atomic-chrome-server-ghost-text
+    (websocket-server-close atomic-chrome-server-ghost-text)
+    (setq atomic-chrome-server-ghost-text nil))
+  (when (process-status "atomic-chrome-httpd")
+    (delete-process "atomic-chrome-httpd"))
+  (ad-disable-advice 'save-buffers-kill-emacs
+                     'before 'atomic-chrome-server-stop-before-kill-emacs)
+  ;; Disabling advice doesn't take effect until you (re-)activate
+  ;; all advice for the function.
+  (ad-activate 'save-buffers-kill-emacs)
+  (global-atomic-chrome-edit-mode 0))
 
 (provide 'atomic-chrome)
 
