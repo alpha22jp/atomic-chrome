@@ -1,9 +1,11 @@
-# Atomic Chrome for Emacs [![MELPA](http://melpa.org/packages/atomic-chrome-badge.svg)](http://melpa.org/#/atomic-chrome)
+# Atomic Chrome for Emacs [![MELPA](http://melpa.org/packages/atomic-chrome-badge.svg)](http://melpa.org/#/atomic-chrome) [![MELPA Stable](http://stable.melpa.org/packages/atomic-chrome-badge.svg)](http://stable.melpa.org/#/atomic-chrome)
 
 This is the Emacs version of [Atomic Chrome](https://github.com/tuvistavie/atomic-chrome) which is an extension for Google Chrome browser that allows you to edit text areas of the browser in Emacs. It's similar to [Edit with Emacs](https://github.com/stsquad/emacs_chrome), but has some advantages as below with the help of websocket.
 
 * The input on Emacs is reflected to the browser instantly and continuously.
 * You can use both the browser and Emacs at the same time. They are updated to the same content bi-directionally.
+
+__Since v2.0.0, Atomic Chrome for Emacs supports [Ghost Text](https://github.com/GhostText/GhostText) as browser extension.__
 
 ## Screencast
 
@@ -18,7 +20,7 @@ This is the Emacs version of [Atomic Chrome](https://github.com/tuvistavie/atomi
 
 ### For Chrome
 
-Atomic Chrome for Emacs shares [extension for Chrome](https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc) with Atomic Chrome. Just install and setup it.
+Atomic Chrome for Emacs shares browser extension with the one for [Atomic Chrome](https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc). Just install and setup it. Alternatively, you can use [Ghost Text](https://chrome.google.com/webstore/detail/ghosttext/godiecgffnchndlihlpaajjcplehddca) as browser extension.
 
 ### For Emacs
 
@@ -79,3 +81,17 @@ Available values are the followings.
 `frame` is available only when you are using Emacs on some window system.
 
 If you select `frame`, you can also set the width and height of the frame with `atomic-chrome-buffer-frame-width` and `atomic-chrome-buffer-frame-height`. Their default values are `80` and `25`.
+
+## History
+
+version 2.0.0 (2016-11-08)
+
+* Add Ghost Text support
+
+version 1.0.1 (2016-11-06)
+
+* Fix updating text from Chrome doesn't work
+
+version 1.0.0 (2016-11-05)
+
+* Initial version
