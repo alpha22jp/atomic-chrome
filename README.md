@@ -82,6 +82,14 @@ Available values are the followings.
 
 If you select `frame`, you can also set the width and height of the frame with `atomic-chrome-buffer-frame-width` and `atomic-chrome-buffer-frame-height`. Their default values are `80` and `25`.
 
+### Select available browser extension
+
+By default, Atomic Chrome for Emacs accepts the connection request from both Atomic Chrome and Ghost Text. If you never use one of them, you can disable it by setting `atomic-chrome-extension-type-list` like below.
+
+``` emacs-lisp
+(setq atomic-chrome-extension-type-list '(atomic-chrome))
+```
+
 ## History
 
 version 2.0.0 (2016-11-08)
