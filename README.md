@@ -86,12 +86,17 @@ If you select `frame`, you can also set the width and height of the frame with `
 
 version 2.0.0 (2016-11-08)
 
-* Add Ghost Text support
+* Add support for Ghost Text
 
 version 1.0.1 (2016-11-06)
 
 * Fix updating text from Chrome doesn't work
 
 version 1.0.0 (2016-11-05)
+
+* Add support for automatic window focus (#6)
+* Fix major mode issue (#1, #7)
+
+version 0.1.0 (2016-10-23)
 
 * Initial version
