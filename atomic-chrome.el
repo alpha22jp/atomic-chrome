@@ -176,7 +176,9 @@ or raising the selected frame depending on `atomic-chrome-buffer-open-style'."
             (if (memq window-system '(ns mac))
                 ;; Avoid using make-frame-on-display for Mac OS.
                 (make-frame frame-params)
-              (make-frame-on-display (getenv "DISPLAY") frame-params)))
+              (make-frame-on-display
+               (if (eq system-type 'windows-nt) "w32" (getenv "DISPLAY"))
+               frame-params)))
       (select-frame edit-frame))
     (if (eq atomic-chrome-buffer-open-style 'split)
         (pop-to-buffer buffer)
