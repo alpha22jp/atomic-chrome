@@ -294,7 +294,8 @@ being prompted to kill the websocket server process."
    :service 4001
    :filter 'atomic-chrome-httpd-process-filter
    :filter-multibyte nil
-   :server t))
+   :server t
+   :noquery t))
 
 (defun atomic-chrome-normalize-header (header)
   "Destructively capitalize the components of HEADER."
