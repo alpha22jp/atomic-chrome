@@ -269,12 +269,6 @@ where FRAME show raw data received."
 (define-global-minor-mode global-atomic-chrome-edit-mode
   atomic-chrome-edit-mode atomic-chrome-turn-on-edit-mode)
 
-(defadvice save-buffers-kill-emacs
-      (before atomic-chrome-server-stop-before-kill-emacs)
-      "Call `atomic-chrome-close-server' before closing Emacs to avoid users \
-being prompted to kill the websocket server process."
-      (atomic-chrome-stop-server))
-
 (defun atomic-chrome-start-websocket-server (port)
   "Create websocket server on port PORT."
   (websocket-server
@@ -349,8 +343,7 @@ STRING is the string process received."
   (and (not (process-status "atomic-chrome-httpd"))
        (memq 'ghost-text atomic-chrome-extension-type-list)
        (atomic-chrome-start-httpd))
-  (global-atomic-chrome-edit-mode 1)
-  (ad-activate 'save-buffers-kill-emacs))
+  (global-atomic-chrome-edit-mode 1))
 
 ;;;###autoload
 (defun atomic-chrome-stop-server nil
@@ -364,11 +357,6 @@ STRING is the string process received."
     (setq atomic-chrome-server-ghost-text nil))
   (when (process-status "atomic-chrome-httpd")
     (delete-process "atomic-chrome-httpd"))
-  (ad-disable-advice 'save-buffers-kill-emacs
-                     'before 'atomic-chrome-server-stop-before-kill-emacs)
-  ;; Disabling advice doesn't take effect until you (re-)activate
-  ;; all advice for the function.
-  (ad-activate 'save-buffers-kill-emacs)
   (global-atomic-chrome-edit-mode 0))
 
 (provide 'atomic-chrome)
