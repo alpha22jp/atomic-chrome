@@ -206,7 +206,9 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
       (save-restriction
         (run-hooks 'atomic-chrome-edit-done-hook)
         (when frame (delete-frame frame))
-        (kill-buffer buffer)))))
+        (if (eq atomic-chrome-buffer-open-style 'split)
+            (quit-window t)
+          (kill-buffer buffer))))))
 
 (defun atomic-chrome-close-current-buffer ()
   "Close current buffer and connection from client."
