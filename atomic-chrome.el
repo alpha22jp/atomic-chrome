@@ -334,6 +334,11 @@ STRING is the string process received."
       (process-send-string proc (concat header "\n" body))
       (process-send-eof proc))))
 
+(defun atomic-chrome-server-running-p()
+  "Detect whether atomic server is running."
+  (string-equal "Emacs\n"
+                (shell-command-to-string
+                 "lsof -i :64292 | grep -E '\\(LISTEN\\)$' | cut -d ' ' -f 1")))
 ;;;###autoload
 (defun atomic-chrome-start-server ()
   "Start websocket server for atomic-chrome."
