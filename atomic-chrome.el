@@ -228,7 +228,8 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
 where FRAME show raw data received."
   (let ((msg (json-read-from-string
               (decode-coding-string
-               (string-make-unibyte (websocket-frame-payload frame)) 'utf-8))))
+               (encode-coding-string (websocket-frame-payload frame) 'utf-8)
+	       'utf-8))))
     (let-alist msg
       (if (eq (websocket-server-conn socket) atomic-chrome-server-ghost-text)
           (if (atomic-chrome-get-buffer-by-socket socket)
