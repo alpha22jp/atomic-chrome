@@ -5,7 +5,7 @@ This is the Emacs version of [Atomic Chrome](https://github.com/tuvistavie/atomi
 * The input on Emacs is reflected to the browser instantly and continuously.
 * You can use both the browser and Emacs at the same time. They are updated to the same content bi-directionally.
 
-__Since v2.0.0, Atomic Chrome for Emacs supports [Ghost Text](https://github.com/GhostText/GhostText) as browser extension.__
+__Since v2.0.0, Atomic Chrome for Emacs supports [Ghost Text](https://github.com/GhostText/GhostText) as browser extension, bringing compatibility with Firefox, too.__
 
 ## Screencast
 
@@ -21,6 +21,10 @@ __Since v2.0.0, Atomic Chrome for Emacs supports [Ghost Text](https://github.com
 ### For Chrome
 
 Atomic Chrome for Emacs shares browser extension with the one for [Atomic Chrome](https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc). Just install and setup it. Alternatively, you can use [Ghost Text](https://chrome.google.com/webstore/detail/ghosttext/godiecgffnchndlihlpaajjcplehddca) as browser extension.
+
+### For Firefox
+
+Install the [GhostText](https://addons.mozilla.org/en-US/firefox/addon/ghosttext/) addon.
 
 ### For Emacs
 

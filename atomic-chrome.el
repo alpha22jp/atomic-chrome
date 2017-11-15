@@ -34,6 +34,8 @@
 ;;   The input on Emacs is reflected to the browser instantly and continuously.
 ;; * Bidirectional communication
 ;;   You can edit both on the browser and Emacs, they are synced to the same.
+;;
+;; Firefox is supported via the GhostText browser addon.
 
 ;;; Code:
 
@@ -43,12 +45,12 @@
 (require 'websocket)
 
 (defgroup atomic-chrome nil
-  "Edit Chrome text area with Emacs using Atomic Chrome."
+  "Edit browser text area with Emacs using Atomic Chrome or GhostText."
   :prefix "atomic-chrome-"
   :group 'applications)
 
 (defcustom atomic-chrome-extension-type-list '(atomic-chrome ghost-text)
-  "List of chrome extension type available."
+  "List of browser extension type available."
   :type '(repeat (choice (const :tag "Atomic Chrome" atomic-chrome)
                          (const :tag "Ghost Text" ghost-text)))
   :group 'atomic-chrome)
@@ -71,14 +73,14 @@
   :group 'atomic-chrome)
 
 (defcustom atomic-chrome-enable-auto-update t
-  "If non-nil, edit on Emacs is reflected to Chrome instantly, \
+  "If non-nil, edit on Emacs is reflected to the browser instantly, \
 otherwise you need to type \"C-xC-s\" manually."
   :type 'boolean
   :group 'atomic-chrome)
 
 (defcustom atomic-chrome-enable-bidirectional-edit t
-  "If non-nil, you can edit both on Chrome text area and Emacs, \
-otherwise edit on Chrome is ignored while editing on Emacs."
+  "If non-nil, you can edit both on the browser text area and Emacs, \
+otherwise edit on browser is ignored while editing on Emacs."
   :type 'boolean
   :group 'atomic-chrome)
 
@@ -254,7 +256,7 @@ where FRAME show raw data received."
   "Keymap for minor mode `atomic-chrome-edit-mode'.")
 
 (define-minor-mode atomic-chrome-edit-mode
-  "Minor mode enabled on buffers opened by Emacs Chrome server."
+  "Minor mode enabled on buffers opened by Emacs Atomic Chrome server."
   :group 'atomic-chrome
   :lighter " AtomicChrome"
   :init-value nil
