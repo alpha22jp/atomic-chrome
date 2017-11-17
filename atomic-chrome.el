@@ -88,8 +88,9 @@ otherwise edit on Chrome is ignored while editing on Emacs."
   :group 'atomic-chrome)
 
 (defcustom atomic-chrome-url-major-mode-alist nil
-  "Association list of URL regexp and corresponding major mode \
-which is used to select major mode for specified website."
+  "Association list of URL (or, for GhostText, hostname) regexp \
+and corresponding major mode which is used to select major mode \
+for specified website."
   :type '(alist :key-type (regexp :tag "regexp")
                 :value-type (function :tag "major mode"))
   :group 'atomic-chrome)

@@ -54,7 +54,7 @@ The default major mode of editing buffer is `text-mode`. You can change the majo
 (setq atomic-chrome-default-major-mode 'markdown-mode)
 ```
 
-Additionally, you can use `atomic-chrome-url-major-mode-alist` to choose the major mode for a specific website based on the page URL like below.
+Additionally, you can use `atomic-chrome-url-major-mode-alist` to choose the major mode for a specific website based on the page URL (or, with GhostText, URL hostname) like below.
 
 ``` emacs-lisp
 (setq atomic-chrome-url-major-mode-alist
