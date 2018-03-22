@@ -194,7 +194,7 @@ or raising the selected frame depending on `atomic-chrome-buffer-open-style'."
   "Create buffer associated with websocket specified by SOCKET.
 URL is used to determine the major mode of the buffer created,
 TITLE is used for the buffer name and TEXT is inserted to the buffer."
-  (let ((buffer (generate-new-buffer title)))
+  (let ((buffer (generate-new-buffer (if (string-empty-p title) "No title" title))))
     (with-current-buffer buffer
       (puthash buffer
              (list socket (atomic-chrome-show-edit-buffer buffer title))
