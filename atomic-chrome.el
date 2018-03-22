@@ -155,7 +155,8 @@ from `atomic-chrome-buffer-table'."
         (if (eq (websocket-server-conn socket) atomic-chrome-server-ghost-text)
             (list (cons "text" text))
           (list '("type" . "updateText")
-                (cons "payload" (list (cons "text" text))))))))))
+                (cons "payload" (list (cons "text" text))))))))
+    (set-buffer-modified-p nil)))
 
 (defun atomic-chrome-set-major-mode (url)
   "Set major mode for editing buffer depending on URL.
@@ -216,7 +217,9 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
 (defun atomic-chrome-close-current-buffer ()
   "Close current buffer and connection from client."
   (interactive)
-  (atomic-chrome-close-edit-buffer (current-buffer)))
+  (when (or (not (buffer-modified-p))
+	    (yes-or-no-p "Buffer has not been saved, close anyway? "))
+    (atomic-chrome-close-edit-buffer (current-buffer))))
 
 (defun atomic-chrome-update-buffer (socket text)
   "Update text on buffer associated with SOCKET to TEXT."
