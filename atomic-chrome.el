@@ -113,6 +113,9 @@ for specified website."
 (defvar atomic-chrome-server-ghost-text nil
   "Websocket server connection handle for Ghost Text.")
 
+(defvar atomic-chrome-server-ghost-text-port 4001
+  "HTTP server port for Ghost Text.")
+
 (defvar atomic-chrome-buffer-table (make-hash-table :test 'equal)
   "Hash table of editing buffer and its assciated data.
 Each element has a list consisting of (websocket, frame).")
@@ -294,7 +297,7 @@ where FRAME show raw data received."
    :name "atomic-chrome-httpd"
    :family 'ipv4
    :host 'local
-   :service 4001
+   :service atomic-chrome-server-ghost-text-port
    :filter 'atomic-chrome-httpd-process-filter
    :filter-multibyte nil
    :server t
