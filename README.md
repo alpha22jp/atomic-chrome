@@ -94,6 +94,16 @@ By default, Atomic Chrome for Emacs accepts the connection request from both Ato
 (setq atomic-chrome-extension-type-list '(atomic-chrome))
 ```
 
+### Set Server Port for Ghost Text
+
+By default, Atomic Chrome for Emacs uses the default port 4001 for Ghost Text. If you need to set this to another port, you can do it by setting `atomic-chrome-server-ghost-text-port` like below.
+
+``` emacs-lisp
+(setq atomic-chrome-server-ghost-text-port 4002)
+```
+
+You may also need to update Ghost Text's port setting in Chrome Extensions page.
+
 ## History
 
 version 2.0.0 (2016-11-08)
