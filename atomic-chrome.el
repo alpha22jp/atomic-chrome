@@ -72,6 +72,11 @@
   :type 'integer
   :group 'atomic-chrome)
 
+(defcustom atomic-chrome-server-ghost-text-port 4001
+  "HTTP server port for Ghost Text."
+  :type 'integer
+  :group 'atomic-chrome)
+
 (defcustom atomic-chrome-enable-auto-update t
   "If non-nil, edit on Emacs is reflected to the browser instantly, \
 otherwise you need to type \"C-xC-s\" manually."
@@ -112,9 +117,6 @@ for specified website."
 
 (defvar atomic-chrome-server-ghost-text nil
   "Websocket server connection handle for Ghost Text.")
-
-(defvar atomic-chrome-server-ghost-text-port 4001
-  "HTTP server port for Ghost Text.")
 
 (defvar atomic-chrome-buffer-table (make-hash-table :test 'equal)
   "Hash table of editing buffer and its assciated data.
