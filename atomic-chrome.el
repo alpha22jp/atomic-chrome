@@ -72,6 +72,11 @@
   :type 'integer
   :group 'atomic-chrome)
 
+(defcustom atomic-chrome-server-ghost-text-port 4001
+  "HTTP server port for Ghost Text."
+  :type 'integer
+  :group 'atomic-chrome)
+
 (defcustom atomic-chrome-enable-auto-update t
   "If non-nil, edit on Emacs is reflected to the browser instantly, \
 otherwise you need to type \"C-xC-s\" manually."
@@ -294,7 +299,7 @@ where FRAME show raw data received."
    :name "atomic-chrome-httpd"
    :family 'ipv4
    :host 'local
-   :service 4001
+   :service atomic-chrome-server-ghost-text-port
    :filter 'atomic-chrome-httpd-process-filter
    :filter-multibyte nil
    :server t
