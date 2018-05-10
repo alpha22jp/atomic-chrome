@@ -351,7 +351,7 @@ STRING is the string process received."
   "Start websocket server for atomic-chrome.  Fails silently if a \
 server is already running."
   (interactive)
-  (condition-case nil
+  (ignore-errors
       (progn
         (and (not atomic-chrome-server-atomic-chrome)
              (memq 'atomic-chrome atomic-chrome-extension-type-list)
@@ -360,8 +360,7 @@ server is already running."
         (and (not (process-status "atomic-chrome-httpd"))
              (memq 'ghost-text atomic-chrome-extension-type-list)
              (atomic-chrome-start-httpd))
-        (global-atomic-chrome-edit-mode 1))
-    (error nil)))
+        (global-atomic-chrome-edit-mode 1))))
 
 ;;;###autoload
 (defun atomic-chrome-stop-server nil
