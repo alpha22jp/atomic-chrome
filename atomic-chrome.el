@@ -348,16 +348,20 @@ STRING is the string process received."
 
 ;;;###autoload
 (defun atomic-chrome-start-server ()
-  "Start websocket server for atomic-chrome."
+  "Start websocket server for atomic-chrome.  Fails silently if a \
+server is already running."
   (interactive)
-  (and (not atomic-chrome-server-atomic-chrome)
-       (memq 'atomic-chrome atomic-chrome-extension-type-list)
-       (setq atomic-chrome-server-atomic-chrome
-             (atomic-chrome-start-websocket-server 64292)))
-  (and (not (process-status "atomic-chrome-httpd"))
-       (memq 'ghost-text atomic-chrome-extension-type-list)
-       (atomic-chrome-start-httpd))
-  (global-atomic-chrome-edit-mode 1))
+  (condition-case nil
+      (progn
+        (and (not atomic-chrome-server-atomic-chrome)
+             (memq 'atomic-chrome atomic-chrome-extension-type-list)
+             (setq atomic-chrome-server-atomic-chrome
+                   (atomic-chrome-start-websocket-server 64292)))
+        (and (not (process-status "atomic-chrome-httpd"))
+             (memq 'ghost-text atomic-chrome-extension-type-list)
+             (atomic-chrome-start-httpd))
+        (global-atomic-chrome-edit-mode 1))
+    (error nil)))
 
 ;;;###autoload
 (defun atomic-chrome-stop-server nil
