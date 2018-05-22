@@ -210,13 +210,15 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
 
 (defun atomic-chrome-close-edit-buffer (buffer)
   "Close buffer BUFFER if it's one of Atomic Chrome edit buffers."
-  (let ((frame (atomic-chrome-get-frame buffer)))
+  (let ((frame (atomic-chrome-get-frame buffer))
+        (window (get-buffer-window buffer)))
     (with-current-buffer buffer
       (save-restriction
         (run-hooks 'atomic-chrome-edit-done-hook)
         (when frame (delete-frame frame))
-        (if (eq atomic-chrome-buffer-open-style 'split)
-            (quit-window t)
+        (if (and (eq atomic-chrome-buffer-open-style 'split)
+                 window)
+            (quit-window t window)
           (kill-buffer buffer))))))
 
 (defun atomic-chrome-close-current-buffer ()
