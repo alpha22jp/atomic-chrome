@@ -42,6 +42,7 @@
 (eval-when-compile (require 'cl))
 (require 'json)
 (require 'let-alist)
+(require 'subr-x)
 (require 'websocket)
 
 (defgroup atomic-chrome nil
