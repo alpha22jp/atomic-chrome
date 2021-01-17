@@ -80,7 +80,7 @@
 
 (defcustom atomic-chrome-enable-auto-update t
   "If non-nil, edit on Emacs is reflected to the browser instantly, \
-otherwise you need to type \"C-xC-s\" manually."
+otherwise you need to type \"C-cC-s\" manually."
   :type 'boolean
   :group 'atomic-chrome)
 
@@ -262,7 +262,7 @@ where FRAME show raw data received."
 
 (defvar atomic-chrome-edit-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-x C-s") 'atomic-chrome-send-buffer-text)
+    (define-key map (kbd "C-c C-s") 'atomic-chrome-send-buffer-text)
     (define-key map (kbd "C-c C-c") 'atomic-chrome-close-current-buffer)
     map)
   "Keymap for minor mode `atomic-chrome-edit-mode'.")

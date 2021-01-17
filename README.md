@@ -50,6 +50,16 @@ Then add the following lines to your `.emacs`.
 
 ## Customization
 
+### Set auto-update mode
+
+Atomic Chrome for Emacs automatically reflects modifications to the browser by default as described above, but you can disable it by setting the variable below.
+
+``` emacs-lisp
+(setq atomic-chrome-enable-auto-update nil)
+```
+
+In this case, you can apply the modifications to the browser with <kbd>C-c C-s</kbd>
+
 ### Set major mode for editing buffer
 
 The default major mode of editing buffer is `text-mode`. You can change the major mode manually. If you want to use a different major mode as the default, set `atomic-chrome-default-major-mode` like below.
