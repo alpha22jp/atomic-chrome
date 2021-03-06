@@ -14,7 +14,7 @@ __Since v2.0.0, Atomic Chrome for Emacs supports [Ghost Text](https://github.com
 ## Requirements
 
 * Emacs: 24.4 or later
-* OS: Tested on Windows and Linux
+* OS: Tested on Windows and Linux, reported to work on macOS
 
 ## Installation
 
