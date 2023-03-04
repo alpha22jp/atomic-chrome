@@ -186,7 +186,7 @@ frame, depending on `atomic-chrome-buffer-open-style'."
       (setq edit-frame
             (cond
              ((memq window-system '(pgtk x))
-              (if (string-match-p "wayland" x-display-name)
+              (if (or (not x-display-name) (string-match-p "wayland" x-display-name))
                   (make-frame frame-params)
                 (make-frame-on-display (getenv "DISPLAY") frame-params)))
              ;; Avoid using make-frame-on-display for Mac OS
