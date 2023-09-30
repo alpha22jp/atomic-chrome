@@ -20,11 +20,11 @@ __Since v2.0.0, Atomic Chrome for Emacs supports [Ghost Text](https://github.com
 
 ### For Chrome
 
-Atomic Chrome for Emacs shares browser extension with the one for [Atomic Chrome](https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc). Just install and setup it. Alternatively, you can use [Ghost Text](https://chrome.google.com/webstore/detail/ghosttext/godiecgffnchndlihlpaajjcplehddca) as browser extension.
+Install the [GhostText](https://chrome.google.com/webstore/detail/ghosttext/godiecgffnchndlihlpaajjcplehddca) Chrome extension.
 
 ### For Firefox
 
-Install the [GhostText](https://addons.mozilla.org/en-US/firefox/addon/ghosttext/) addon.
+Install the [GhostText](https://addons.mozilla.org/en-US/firefox/addon/ghosttext/) Firefox extension.
 
 ### For Emacs
 
