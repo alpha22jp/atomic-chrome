@@ -357,6 +357,21 @@ STRING is the string process received."
       (process-send-eof proc))))
 
 ;;;###autoload
+(defun atomic-chrome-server-running-p ()
+  "Returns `t' if the atomic-chrome server is currently running,
+`nil' otherwise."
+  (let ((retval nil))
+    (condition-case ex
+        (progn
+          (delete-process
+           (make-network-process
+            :name "atomic-client-test" :host "localhost"
+            :noquery t :service "64292"))
+          (setq retval t))
+      ('error nil))
+    retval))
+
+;;;###autoload
 (defun atomic-chrome-start-server ()
   "Start websocket server for atomic-chrome.
 Fails silently if a server is already running."
