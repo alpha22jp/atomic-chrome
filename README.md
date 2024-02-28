@@ -7,6 +7,8 @@ This is the Emacs version of [Atomic Chrome](https://github.com/tuvistavie/atomi
 
 __Since v2.0.0, Atomic Chrome for Emacs supports [Ghost Text](https://github.com/GhostText/GhostText) as browser extension, bringing compatibility with Firefox, too.__
 
+Since the [Atomic Chrome](https://github.com/tuvistavie/atomic-chrome) extension was removed from the Chrome Web Store, Atomic Chrome for Emacs now also supports [chrome-emacs](https://github.com/KarimAziev/chrome-emacs), a fork that adds support for Manifest V3.
+
 ## Screencast
 
 ![Screencast](https://github.com/alpha22jp/atomic-chrome/blob/master/images/screencast.gif)
@@ -20,7 +22,7 @@ __Since v2.0.0, Atomic Chrome for Emacs supports [Ghost Text](https://github.com
 
 ### For Chrome
 
-Install the [GhostText](https://chrome.google.com/webstore/detail/ghosttext/godiecgffnchndlihlpaajjcplehddca) Chrome extension.
+Install the [GhostText](https://chrome.google.com/webstore/detail/ghosttext/godiecgffnchndlihlpaajjcplehddca) or [chrome-emacs](https://chromewebstore.google.com/detail/chrome-emacs/dabdpcafiblbndpoadckibiaojbdnpjg) Chrome extension.
 
 ### For Firefox
 
@@ -98,7 +100,7 @@ If you select `frame`, you can also set the width and height of the frame with `
 
 ### Select available browser extension
 
-By default, Atomic Chrome for Emacs accepts the connection request from both Atomic Chrome and Ghost Text. If you never use one of them, you can disable it by setting `atomic-chrome-extension-type-list` like below.
+By default, Atomic Chrome for Emacs accepts connection requests from Atomic Chrome, Ghost Text, and chrome-emacs. If you prefer to use only specific extensions, you can customize the `atomic-chrome-extension-type-list` accordingly. For example, to accept connections only from Atomic Chrome or chrome-emacs (which requires the same settings as Atomic Chrome), you can set it like below.
 
 ``` emacs-lisp
 (setq atomic-chrome-extension-type-list '(atomic-chrome))
