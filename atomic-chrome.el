@@ -1,4 +1,4 @@
-;;; atomic-chrome.el --- Edit Chrome text area with Emacs using Atomic Chrome
+;;; atomic-chrome.el --- Edit Chrome text area with Emacs using Atomic Chrome -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2016 alpha22jp <alpha22jp@gmail.com>
 
@@ -244,26 +244,77 @@ TITLE is used for the buffer name and TEXT is inserted to the buffer."
         (erase-buffer)
         (insert text)))))
 
+(defvar atomic-chrome-frame-socket-incomplete-buffers-hash (make-hash-table
+                                                            :test 'eq)
+  "A hash table mapping websocket sockets to buffers.
+Each buffer accumulates payload fragments from incomplete websocket frames
+associated with a specific socket connection.
+
+This allows for efficient handling and concatenation of large and/or fragmented
+messages.")
+
+
 (defun atomic-chrome-on-message (socket frame)
   "Handle data received from the websocket client specified by SOCKET.
-FRAME holds the raw data received."
-  (let ((msg (json-read-from-string
-              (decode-coding-string
-               (encode-coding-string (websocket-frame-payload frame) 'utf-8)
-	       'utf-8))))
-    (let-alist msg
-      (if (eq (websocket-server-conn socket) atomic-chrome-server-ghost-text)
-          (if (atomic-chrome-get-buffer-by-socket socket)
-              (atomic-chrome-update-buffer socket .text)
-            (atomic-chrome-create-buffer socket .url .title .text))
-        (cond ((string= .type "register")
-               (atomic-chrome-create-buffer socket .payload.url .payload.title .payload.text))
-              ((string= .type "updateText")
-               (when atomic-chrome-enable-bidirectional-edit
-                 (atomic-chrome-update-buffer socket .payload.text))))))))
+FRAME holds the raw data received.
+
+When frames are marked as incomplete or a previous incomplete frame
+exists for the SOCKET, payload fragments are accumulated in a dedicated buffer.
+
+Upon receiving the final fragment, the full payload is reconstructed,
+decoded, and processed as a JSON object to either create or update
+associated Emacs buffers for editing."
+  (let ((raw-payload (websocket-frame-payload frame))
+        (incomplete-data-buffer
+         (gethash socket
+                  atomic-chrome-frame-socket-incomplete-buffers-hash)))
+    (cond ((not (websocket-frame-completep frame))
+           (unless incomplete-data-buffer
+             (setq incomplete-data-buffer
+                   (generate-new-buffer
+                    (format " *atomic-chrome-%s*" (current-time-string)) t)))
+           (with-current-buffer incomplete-data-buffer
+             (goto-char (point-max))
+             (insert raw-payload))
+           (puthash socket incomplete-data-buffer
+                    atomic-chrome-frame-socket-incomplete-buffers-hash))
+          (t
+           (let* ((combined-payload
+                   (if (not incomplete-data-buffer)
+                       raw-payload
+                     (unwind-protect
+                         (with-current-buffer
+                             incomplete-data-buffer
+                           (goto-char (point-max))
+                           (insert raw-payload)
+                           (set-buffer-modified-p nil)
+                           (buffer-string))
+                       (remhash socket
+                                atomic-chrome-frame-socket-incomplete-buffers-hash)
+                       (kill-buffer incomplete-data-buffer))))
+                  (msg (json-read-from-string
+                        (decode-coding-string
+                         (encode-coding-string combined-payload
+                                               'utf-8)
+                         'utf-8))))
+             (let-alist msg
+               (if (eq (websocket-server-conn socket)
+                       atomic-chrome-server-ghost-text)
+                   (if (atomic-chrome-get-buffer-by-socket socket)
+                       (atomic-chrome-update-buffer socket .text)
+                     (atomic-chrome-create-buffer socket .url .title .text))
+                 (cond ((string= .type "register")
+                        (atomic-chrome-create-buffer socket .payload.url
+                                                     .payload.title
+                                                     .payload.text))
+                       ((string= .type "updateText")
+                        (when atomic-chrome-enable-bidirectional-edit
+                          (atomic-chrome-update-buffer socket .payload.text)))))))))))
+
 
 (defun atomic-chrome-on-close (socket)
   "Function to handle request from client to close websocket SOCKET."
+  (remhash socket atomic-chrome-frame-socket-incomplete-buffers-hash)
   (let ((buffer (atomic-chrome-get-buffer-by-socket socket)))
     (when buffer (atomic-chrome-close-edit-buffer buffer))))
 
