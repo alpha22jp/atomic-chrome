@@ -271,8 +271,10 @@ associated Emacs buffers for editing."
     (cond ((not (websocket-frame-completep frame))
            (unless incomplete-data-buffer
              (setq incomplete-data-buffer
-                   (generate-new-buffer
-                    (format " *atomic-chrome-%s*" (current-time-string)) t)))
+                   (let ((name (format " *atomic-chrome-%s*" (current-time-string))))
+                     (if (version< emacs-version "28.1")
+                         (generate-new-buffer name)
+                       (generate-new-buffer name t)))))
            (with-current-buffer incomplete-data-buffer
              (goto-char (point-max))
              (insert raw-payload))
